@@ -27,8 +27,22 @@ const loggerMiddleware = (req, res, next) => {
   console.log(`${req.url} ${req.method} -- ${new Date()}`);
   next();
 };
+const whiteList =
+  process.env.NODE_ENV === "production"
+    ? [process.env.FE_URL_PROD, process.env.FE_URL_PROD1]
+    : [process.env.FE_URL_DEV];
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (whiteList.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("NOT ALLOWED - CORS ISSUES"));
+    }
+  },
+};
+
 server.use(helmet());
-server.use(cors());
+server.use(cors(corsOptions));
 server.use(express.json());
 server.use(loggerMiddleware);
 //Routes
@@ -62,7 +76,11 @@ mongoose
   })
   .then(
     server.listen(port, () => {
-      console.log("Server running on port", port);
+      if (process.env.NODE_ENV === "production") {
+        console.log("Running on cloud on port", port);
+      } else {
+        console.log("Running locally on port", port);
+      }
     })
   )
   .catch((err) => console.log(err));
