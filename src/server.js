@@ -57,7 +57,7 @@ server.use(forbiddenHandler);
 server.use(badRequestHandler);
 server.use(catchAllHandler);
 
-console.log(listEndPoints(server));
+// console.log(listEndPoints(server));
 
 /* mongoose.connect(process.env.MONGO_CONNECTION, {
     useNewUrlParser: true,

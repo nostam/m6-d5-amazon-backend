@@ -1,36 +1,38 @@
-const express = require("express")
-const mongoose = require("mongoose")
-const q2m = require("query-to-mongo")
-const ProductModel = require("./schema")
-const { err, mongoErr } = require("../../lib/index")
-const { CloudinaryStorage } = require("multer-storage-cloudinary")
-const cloudinary = require("../../cloudinary")
+const express = require("express");
+const mongoose = require("mongoose");
+const q2m = require("query-to-mongo");
+const ProductModel = require("./schema");
+const { err, mongoErr } = require("../../lib/index");
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../../cloudinary");
 
 const productsRouter = express.Router();
 
 const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: "marketplace",
-    },
-})
+  cloudinary: cloudinary,
+  params: {
+    folder: "marketplace",
+  },
+});
 
+const cloudinaryMulter = multer({ storage: storage });
 
-const cloudinaryMulter = multer({ storage: storage })
-
-productsRouter.post("/",
-    cloudinaryMulter.single("image"),
-    async (req, res, next) => {
-        try {
-        const newProduct = new ProductModel(req.body)
-        const { _id } = await newProduct.save()
-        res.status(201).send(_id)
+productsRouter.post(
+  "/",
+  cloudinaryMulter.single("image"),
+  async (req, res, next) => {
+    try {
+      const newProduct = new ProductModel(req.body);
+      const { _id } = await newProduct.save();
+      res.status(201).send(_id);
     } catch (error) {
-        console.log(error)
-        next(mongoErr(error))
+      console.log(error);
+      next(mongoErr(error));
     }
-            //img: req.file.path,
-        })
+    //img: req.file.path,
+  }
+);
 
 //GET /products
 /* productsRouter.get("/", async (req, res, next) => {
@@ -47,21 +49,24 @@ productsRouter.post("/",
 
 //GET /products with query
 productsRouter.get("/", async (req, res, next) => {
-    try {
-        const query = q2m(req.query)
-        console.log(query)
-        const totProducts = await ProductModel.countDocuments(query.criteria)
-        const products = await ProductModel.find(query.criteria, query.options.fields)
-        .skip(query.options.skip)
-        .limit(query.options.limit)
-        .sort(query.options.sort)
-        .populate("user", { _id: 0, name: 1})
-        res.send({links: query.links("/products",totProducts), products})
-    } catch (error) {
-        console.log(error)
-        next (error)
-    }
-})
+  try {
+    const query = q2m(req.query);
+    console.log(query);
+    const totProducts = await ProductModel.countDocuments(query.criteria);
+    const products = await ProductModel.find(
+      query.criteria,
+      query.options.fields
+    )
+      .skip(query.options.skip)
+      .limit(query.options.limit)
+      .sort(query.options.sort)
+      .populate("user", { _id: 0, name: 1 });
+    res.send({ links: query.links("/products", totProducts), products });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
 
 //GET /products/:id
 productsRouter.get("/:id", async (req, res, next) => {
