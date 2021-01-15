@@ -36,7 +36,9 @@ const ProductSchema = new Schema({
                 default: 1,
                 required: true,
             },
-            date: Date,
+            date: {
+                type: Date,
+            }
         }]
     },
     {
