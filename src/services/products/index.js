@@ -9,18 +9,6 @@ const productsRouter = express.Router()
 
 /*
 
-products:
-GET => query, pagination
-GET/:id
-POST
-DELETE
-PUT
-
-products/:id/reviews GET
-products/:id/reviews/:reviewId GET
-products/:id/reviews POST
-products/:id/reviews/:reviewID PUT
-products/:id/reviews/:reviewId DELETE
 
 users/:id/add-to-cart
 users: 
@@ -33,7 +21,7 @@ collections:
 */
 
 //GET /products
-productsRouter.get("/", async (req, res, next) => {
+/* productsRouter.get("/", async (req, res, next) => {
     try {
         const products = await ProductModel.find()
         res.send(products)
@@ -43,13 +31,31 @@ productsRouter.get("/", async (req, res, next) => {
         console.log(error)
         next(mongoErr)
     }
+}) */
+
+//GET /products with query
+productsRouter.get("/", async (req, res, next) => {
+    try {
+        const query = q2m(req.query)
+        console.log(query)
+        const totProducts = await ProductModel.countDocuments(query.criteria)
+        const products = await ProductModel.find(query.criteria, query.options.fields)
+        .skip(query.options.skip)
+        .limit(query.options.limit)
+        .sort(query.options.sort)
+        .populate("user", { _id: 0, name: 1, img: 1 })
+        res.send({links: query.links("/products",totProducts), products})
+    } catch (error) {
+        console.log(error)
+        next (error)
+    }
 })
 
 //GET /products/:id
 productsRouter.get("/:id", async (req, res, next) => {
     try {
         const id = req.params.id
-        const product = await ProductModel.findById(id)
+        const product = await ProductModel.findById(id).populate("user")
         //need to .populate("user")
         if (product) {
             res.send(product)
@@ -212,7 +218,7 @@ productsRouter.put("/:id/reviews/:reviewId", async (req, res, next) => {
     }
 })
 
-
+//DELETE /products/:id/reviews/:reviewId 
 productsRouter.delete("/:id/reviews/:reviewId", async (req, res, next) => {
     try {
         const modifiedReview = await ProductModel.findByIdAndUpdate(

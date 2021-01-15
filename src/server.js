@@ -6,6 +6,7 @@ const mongoose = require("mongoose")
 
 const productsRouter = require("./services/products")
 const reviewsRouter = require("./services/reviews")
+const usersRouter = require("./services/users")
 
 const {notFoundHandler,
   unauthorizedHandler,
@@ -30,6 +31,7 @@ server.use(loggerMiddleware)
 //Routes
 server.use("/products", productsRouter)
 server.use("/reviews", reviewsRouter)
+server.use("/users", usersRouter)
 
 //Error Handlers
 server.use(notFoundHandler)
