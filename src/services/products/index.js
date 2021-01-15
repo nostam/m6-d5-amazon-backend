@@ -2,23 +2,36 @@ const express = require("express")
 const mongoose = require("mongoose")
 const q2m = require("query-to-mongo")
 const ProductModel = require("./schema")
-const {err, mongoErr} = require("../../lib/index")
+const { err, mongoErr } = require("../../lib/index")
+const { CloudinaryStorage } = require("multer-storage-cloudinary")
+const cloudinary = require("../../cloudinary")
+
 
 
 const productsRouter = express.Router()
 
-/*
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "marketplace",
+    },
+})
 
+const cloudinaryMulter = multer({ storage: storage })
 
-users/:id/add-to-cart
-users: 
-GET, GET :userId, POST, PUT :userId, DELETE :userId
-
-collections:
--products
--users
-
-*/
+productsRouter.post("/",
+    cloudinaryMulter.single("image"),
+    async (req, res, next) => {
+        try {
+        const newProduct = new ProductModel(req.body)
+        const { _id } = await newProduct.save()
+        res.status(201).send(_id)
+    } catch (error) {
+        console.log(error)
+        next(mongoErr(error))
+    }
+            //img: req.file.path,
+        })
 
 //GET /products
 /* productsRouter.get("/", async (req, res, next) => {
@@ -43,7 +56,7 @@ productsRouter.get("/", async (req, res, next) => {
         .skip(query.options.skip)
         .limit(query.options.limit)
         .sort(query.options.sort)
-        .populate("user", { _id: 0, name: 1, img: 1 })
+        .populate("user", { _id: 0, name: 1})
         res.send({links: query.links("/products",totProducts), products})
     } catch (error) {
         console.log(error)
