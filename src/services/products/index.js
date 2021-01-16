@@ -3,20 +3,19 @@ const mongoose = require("mongoose")
 const q2m = require("query-to-mongo")
 const ProductModel = require("./schema")
 const { err, mongoErr } = require("../../lib/index")
-const { CloudinaryStorage } = require("multer-storage-cloudinary")
-const cloudinary = require("../../cloudinary")
+//const { CloudinaryStorage } = require("multer-storage-cloudinary")
+//const cloudinary = require("../../cloudinary")
 
 const productsRouter = express.Router();
 
-const storage = new CloudinaryStorage({
+/* const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         folder: "marketplace",
     },
-})
+}) */
 
-
-const cloudinaryMulter = multer({ storage: storage })
+/* const cloudinaryMulter = multer({ storage: storage })
 
 productsRouter.post("/",
     cloudinaryMulter.single("image"),
@@ -30,7 +29,7 @@ productsRouter.post("/",
         next(mongoErr(error))
     }
             //img: req.file.path,
-        })
+        }) */
 
 //GET /products
 /* productsRouter.get("/", async (req, res, next) => {
